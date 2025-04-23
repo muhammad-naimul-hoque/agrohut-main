@@ -4,7 +4,7 @@ const authSeller = async (req, res, next) => {
     const { sellerToken } = req.cookies;
 
     if (!sellerToken) {
-        res.json({ success: false, message: "Not Authorized" });
+        return res.json({ success: false, message: "Not Authorized" });
     }
 
     try {
@@ -16,7 +16,7 @@ const authSeller = async (req, res, next) => {
             else {
                 return res.json({ success: false, message: 'Not Authorized' });
             }
-            next();
+            
         } catch (error) {
             return res.json({ success: false, message: error.message});
         }
