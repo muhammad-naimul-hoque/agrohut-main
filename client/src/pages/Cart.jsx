@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import { assets, dummyAddress } from "../assets/assets";
+import toast from "react-hot-toast";
+import { data } from "react-router";
 
 const Cart = () => {
   const {
@@ -12,12 +14,14 @@ const Cart = () => {
     updateCartItem,
     navigate,
     getTotalAmount,
+    axios,
+    user,
   } = useAppContext();
 
   const [cartArray, setCartArray] = useState([]);
-  const [addresses, setAddresses] = useState(dummyAddress);
+  const [addresses, setAddresses] = useState([]);
   const [showAddress, setShowAddress] = useState(false);
-  const [selectedAddresses, setSelectedAddresses] = useState(dummyAddress[0]);
+  const [selectedAddresses, setSelectedAddresses] = useState(null);
   const [paymentOption, setPaymentOption] = useState("COD");
 
   const getCart = () => {
@@ -30,6 +34,23 @@ const Cart = () => {
     setCartArray(tempArray);
   };
 
+  const getUserAddress = async () => {
+    try {
+      const { data } = await axios.get(`/api/address/get?userId=${user._id}`);
+      console.log("Address Response:", data); //
+      if (data.success) {
+        setAddresses(data.addresses);
+        if (data.addresses.length > 0) {
+          setSelectedAddresses(data.addresses[0]);
+        } else {
+          toast.error(data.message);
+        }
+      }
+    } catch (error) {
+      toast.error(data.message);
+    }
+  };
+
   const placeOrder = async () => {};
 
   useEffect(() => {
@@ -37,6 +58,12 @@ const Cart = () => {
       getCart();
     }
   }, [products, cartItems]);
+
+  useEffect(() => {
+    if (user) {
+      getUserAddress();
+    }
+  }, [user]);
 
   return products.length > 0 && cartItems ? (
     <div className="flex flex-col md:flex-row mt-16">
@@ -143,11 +170,11 @@ const Cart = () => {
           <p className="text-sm font-medium uppercase">Delivery Address</p>
           <div className="relative flex justify-between items-start mt-2">
             <p className="text-gray-500">
-              {" "}
               {selectedAddresses
                 ? `${selectedAddresses.street}, ${selectedAddresses.city}, ${selectedAddresses.state}, ${selectedAddresses.country}`
-                : "No address found"}{" "}
+                : "No address found"}
             </p>
+
             <button
               onClick={() => setShowAddress(!showAddress)}
               className="text-primary hover:underline cursor-pointer"
@@ -220,7 +247,7 @@ const Cart = () => {
         </div>
 
         <button
-          onClick={placeOrder()}
+          onClick={placeOrder}
           className="w-full py-3 mt-6 cursor-pointer bg-primary text-white font-medium hover:bg-primary-dull transition"
         >
           {paymentOption === "COD" ? "Place Order" : "Proceed To Checkout"}

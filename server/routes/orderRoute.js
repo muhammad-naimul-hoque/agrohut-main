@@ -1,12 +1,11 @@
 import express from 'express';
-import authUser from '../middlewares/authUser.js';
-import { getAllOrders, getUserOrders, placeOrderCOD } from '../controllers/orderController.js';
+import { isSellerAuth, sellerLogin, sellerLogout } from '../controllers/sellerController.js';
 import authSeller from '../middlewares/authSeller.js';
 
-const orderRouter = express.Router();
+const sellerRoute = express.Router();
 
-orderRouter.post('/cod', authUser, placeOrderCOD);
-orderRouter.get('/user', authUser, getUserOrders);
-orderRouter.get('/seller', authSeller, getAllOrders);
+sellerRoute.post('/login', sellerLogin)
+sellerRoute.get('/is-auth',authSeller, isSellerAuth)
+sellerRoute.get('/logout', sellerLogout)
 
-export default orderRouter;
+export default sellerRoute;
